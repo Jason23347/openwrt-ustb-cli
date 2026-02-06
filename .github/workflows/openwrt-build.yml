@@ -39,13 +39,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-${{ matrix.architecture }}-${{ matrix.version }}-packages
-          path: bin/packages/*/packages/*.ipk
+          path: bin/targets/*/*/packages/*.ipk
 
       - name: Upload to GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name }}
-          files: bin/packages/*/packages/*.ipk
+          files: bin/targets/*/*/packages/*.ipk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
