@@ -4,12 +4,11 @@
 name: OpenWrt Package Build
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
   release:
     types: [ published ]
+
+permissions:
+  contents: write
 
 jobs:
   openwrt-build:
@@ -30,7 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build OpenWrt package
-        uses: immortalwrt/gh-action-sdk@main
+        uses: openwrt/gh-action-sdk@main
         env:
           ARCH: ${{ matrix.architecture }}-openwrt-${{ matrix.version }}
           FEEDNAME: ustb_cli_c
