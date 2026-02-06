@@ -1,0 +1,52 @@
+# 使用 OpenWrt 官方 SDK 构建 ustb-cli 的 .ipk 包
+# 依赖 openwrt/gh-action-sdk，将当前仓库作为 feed，仅构建 package/ustb-cli
+
+name: OpenWrt Package Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    types: [ published ]
+
+jobs:
+  openwrt-build:
+    name: rockchip-armv8 ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [ "rockchip-armv8" ]
+        version: [ "24.10" ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build OpenWrt package
+        uses: immortalwrt/gh-action-sdk@main
+        env:
+          ARCH: ${{ matrix.architecture }}-openwrt-${{ matrix.version }}
+          FEEDNAME: ustb_cli_c
+          PACKAGES: ustb-cli
+
+      - name: Upload .ipk artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-${{ matrix.architecture }}-${{ matrix.version }}-packages
+          path: bin/packages/*/packages/*.ipk
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: bin/packages/*/packages/*.ipk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
